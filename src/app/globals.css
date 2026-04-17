@@ -1,0 +1,119 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #faf6ef;
+    --ink: #1a2e2c;
+    --forest: #0f4c4a;
+    --clay: #c76d52;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: "Manrope", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  /* Grain texture overlay — barely perceptible, adds warmth */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+  }
+
+  ::selection {
+    background: #0f4c4a;
+    color: #faf6ef;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: "Fraunces", serif;
+    font-variation-settings: "SOFT" 50, "WONK" 0;
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply mx-auto w-full max-w-[1280px] px-6 md:px-10;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-full bg-forest-700 px-6 py-3.5 text-sm font-medium uppercase tracking-[0.08em] text-cream-100 transition-all duration-300 hover:bg-forest-900 hover:shadow-[0_12px_30px_-8px_rgba(15,76,74,0.5)];
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center gap-2 rounded-full border border-ink-800/25 px-6 py-3.5 text-sm font-medium uppercase tracking-[0.08em] text-ink-800 transition-all duration-300 hover:border-ink-800 hover:bg-ink-800 hover:text-cream-100;
+  }
+
+  .btn-clay {
+    @apply inline-flex items-center gap-2 rounded-full bg-clay-500 px-6 py-3.5 text-sm font-medium uppercase tracking-[0.08em] text-cream-100 transition-all duration-300 hover:bg-clay-600 hover:shadow-[0_12px_30px_-8px_rgba(199,109,82,0.5)];
+  }
+
+  .card-soft {
+    @apply rounded-3xl border border-ink-800/5 bg-cream-50 shadow-[0_1px_0_rgba(15,31,29,0.04),0_20px_40px_-24px_rgba(15,31,29,0.12)];
+  }
+
+  .eyebrow {
+    @apply font-body text-xs font-medium uppercase tracking-[0.2em] text-forest-700;
+  }
+
+  .serif-italic {
+    @apply italic font-display;
+    font-variation-settings: "SOFT" 100, "WONK" 1;
+  }
+
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .link-underline:hover {
+    background-size: 100% 1px;
+  }
+}
+
+/* Decorative dotted pattern used in hero backgrounds */
+.dot-pattern {
+  background-image: radial-gradient(circle, rgba(15, 76, 74, 0.15) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Hide scrollbars on horizontal pill rails — keep scroll behavior */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;             /* Chrome/Safari/Opera */
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f3ecdf;
+}
+::-webkit-scrollbar-thumb {
+  background: #0f4c4a;
+  border-radius: 99px;
+  border: 2px solid #f3ecdf;
+}
