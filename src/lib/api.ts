@@ -31,6 +31,13 @@ function mapDoctor(raw: any): Doctor {
   const fullName = `${first} ${last}`.trim();
   const profile = raw.profile ?? {};
   const spec = profile.specialization || "General Practitioner";
+
+  // Prefer uploaded photo from backend, fall back to generated avatar
+  const uploadedPhoto = raw.photo_url || profile.photo_url;
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    fullName.replace(/^dr\.?\s*/i, ""),
+  )}&background=0F4C4A&color=FAF6EF&size=512&bold=true&format=png`;
+
   return {
     id: raw.id, name: fullName, specialization: spec, department: spec,
     qualification: profile.qualification || "MBBS",
@@ -39,9 +46,7 @@ function mapDoctor(raw: any): Doctor {
     bio: profile.bio || "Experienced specialist at Sahara Hospital.",
     languages: ["Hindi", "English"],
     available_days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-    photo_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      fullName.replace(/^dr\.?\s*/i, ""),
-    )}&background=0F4C4A&color=FAF6EF&size=512&bold=true&format=png`,
+    photo_url: uploadedPhoto || fallbackAvatar,
     rating: 4.8, consultations: 0,
   };
 }
@@ -59,6 +64,8 @@ function mapWard(raw: any): Ward {
     beds: beds.map((b: any) => ({
       id: b.id, bed_number: b.bed_number, is_occupied: !!b.is_occupied,
     })),
+    // Gallery photos uploaded via HMS; backend returns them as an array of URL paths
+    photos: Array.isArray(raw.photos) ? raw.photos : [],
   };
 }
 
@@ -94,6 +101,25 @@ export async function getWards(): Promise<Ward[]> {
 export async function getHospitalStats() {
   try { const { data } = await api.get("/public/stats"); return data; }
   catch { return MOCK_STATS; }
+}
+
+/* ─── Hospital photo gallery (about / home page) ───────────────────────── */
+export type HospitalPhoto = {
+  id: number;
+  photo_url: string;
+  caption?: string | null;
+  category?: string | null;
+};
+
+export async function getHospitalPhotos(category?: string): Promise<HospitalPhoto[]> {
+  try {
+    const { data } = await api.get("/public/hospital-photos", {
+      params: category ? { category } : {},
+    });
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
 }
 
 /* ─── Auth ─────────────────────────────────────────────────────────────── */

@@ -30,6 +30,7 @@ export type Ward = {
   total_beds: number;
   available_beds: number;
   beds: Bed[];
+  photos?: string[];
 };
 
 export const MOCK_DOCTORS: Doctor[] = [
@@ -182,6 +183,7 @@ export const MOCK_WARDS: Ward[] = [
     total_beds: 8,
     available_beds: 5,
     beds: makeBeds("EM", 8, 3),
+    photos: [],
   },
   {
     id: 2,
@@ -194,6 +196,7 @@ export const MOCK_WARDS: Ward[] = [
     total_beds: 10,
     available_beds: 2,
     beds: makeBeds("ICU", 10, 8),
+    photos: [],
   },
   {
     id: 3,
@@ -206,6 +209,7 @@ export const MOCK_WARDS: Ward[] = [
     total_beds: 24,
     available_beds: 11,
     beds: makeBeds("GW", 24, 13),
+    photos: [],
   },
   {
     id: 4,
@@ -218,6 +222,7 @@ export const MOCK_WARDS: Ward[] = [
     total_beds: 14,
     available_beds: 4,
     beds: makeBeds("SPR", 14, 10),
+    photos: [],
   },
   {
     id: 5,
@@ -230,6 +235,7 @@ export const MOCK_WARDS: Ward[] = [
     total_beds: 12,
     available_beds: 6,
     beds: makeBeds("PR", 12, 6),
+    photos: [],
   },
   {
     id: 6,
@@ -242,6 +248,7 @@ export const MOCK_WARDS: Ward[] = [
     total_beds: 4,
     available_beds: 3,
     beds: makeBeds("DX", 4, 1),
+    photos: [],
   },
   {
     id: 7,
@@ -254,6 +261,7 @@ export const MOCK_WARDS: Ward[] = [
     total_beds: 10,
     available_beds: 4,
     beds: makeBeds("MAT", 10, 6),
+    photos: [],
   },
 ];
 

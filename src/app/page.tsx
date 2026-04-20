@@ -15,10 +15,23 @@ import {
   ShieldCheck,
   ArrowRight,
 } from "lucide-react";
-import { getDoctors, getWards, getHospitalStats } from "@/lib/api";
+import {
+  getDoctors,
+  getWards,
+  getHospitalStats,
+  getHospitalPhotos,
+} from "@/lib/api";
 
-// Prevent caching so bed availability feels live
 export const revalidate = 60;
+
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, "") ||
+  "http://localhost:8000";
+
+function resolveUrl(url: string): string {
+  if (url.startsWith("http")) return url;
+  return `${API_BASE}${url.startsWith("/") ? "" : "/"}${url}`;
+}
 
 const serviceIcons: Record<string, any> = {
   Cardiology: Heart,
@@ -32,10 +45,11 @@ const serviceIcons: Record<string, any> = {
 };
 
 export default async function HomePage() {
-  const [doctors, wards, stats] = await Promise.all([
+  const [doctors, wards, stats, photos] = await Promise.all([
     getDoctors(),
     getWards(),
     getHospitalStats(),
+    getHospitalPhotos(),
   ]);
 
   const featuredDoctors = doctors.slice(0, 4);
@@ -43,13 +57,20 @@ export default async function HomePage() {
   const availableBeds = wards.reduce((s, w) => s + w.available_beds, 0);
   const icu = wards.find((w) => w.type === "icu");
 
+  // Pick hero photo (first uploaded) with Unsplash fallback
+  const heroPhoto = photos[0];
+  const heroSrc = heroPhoto
+    ? resolveUrl(heroPhoto.photo_url)
+    : "https://images.unsplash.com/photo-1551076805-e1869033e561?w=900&auto=format&fit=crop&q=80";
+
+  // Photos for the "Behind our walls" strip (skip the hero photo)
+  const stripPhotos = photos.slice(heroPhoto ? 1 : 0, heroPhoto ? 9 : 8);
+
   return (
     <>
       {/* ===== HERO ===== */}
       <section className="relative overflow-hidden pt-10 pb-32">
-        {/* decorative dot pattern top-right */}
         <div className="absolute top-24 right-0 w-[340px] h-[340px] dot-pattern opacity-60 pointer-events-none" />
-        {/* organic blob bottom-left */}
         <svg
           className="absolute -bottom-32 -left-24 w-[520px] opacity-[0.08] text-forest-700 pointer-events-none"
           viewBox="0 0 200 200"
@@ -60,7 +81,6 @@ export default async function HomePage() {
 
         <div className="container-x relative">
           <div className="grid lg:grid-cols-[1.15fr_1fr] gap-16 items-start">
-            {/* Left: Display headline */}
             <div className="pt-12">
               <div className="eyebrow animate-fade-up">
                 <span className="inline-block w-8 h-px bg-forest-700 align-middle mr-3" />
@@ -73,33 +93,22 @@ export default async function HomePage() {
                 <span className="text-clay-500"> Bhadohi</span>.
               </h1>
 
-              <p
-                className="mt-8 max-w-lg text-lg text-ink-500 leading-relaxed animate-fade-up"
-                style={{ animationDelay: "0.15s" }}
-              >
+              <p className="mt-8 max-w-lg text-lg text-ink-500 leading-relaxed animate-fade-up" style={{ animationDelay: "0.15s" }}>
                 82 beds, 24 specialist doctors, and a culture that still runs on chai and
                 patience. Check live bed availability, meet our doctors, and book an OPD
                 slot in under a minute.
               </p>
 
-              <div
-                className="mt-10 flex flex-wrap gap-4 animate-fade-up"
-                style={{ animationDelay: "0.3s" }}
-              >
+              <div className="mt-10 flex flex-wrap gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
                 <Link href="/book" className="btn-clay">
-                  Book Appointment
-                  <ArrowUpRight size={16} />
+                  Book Appointment <ArrowUpRight size={16} />
                 </Link>
                 <Link href="/rooms" className="btn-outline">
                   Check Bed Availability
                 </Link>
               </div>
 
-              {/* Trust line */}
-              <div
-                className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 animate-fade-up"
-                style={{ animationDelay: "0.45s" }}
-              >
+              <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 animate-fade-up" style={{ animationDelay: "0.45s" }}>
                 <div className="flex items-center gap-2 text-sm text-ink-500">
                   <Clock size={14} className="text-forest-700" /> 24×7 Emergency
                 </div>
@@ -113,24 +122,27 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Right: image card + floating data cards */}
-            <div
-              className="relative h-[560px] animate-fade-up"
-              style={{ animationDelay: "0.2s" }}
-            >
-              {/* Main image */}
+            <div className="relative h-[560px] animate-fade-up" style={{ animationDelay: "0.2s" }}>
               <div className="absolute top-0 right-0 w-[85%] h-[78%] rounded-[32px] overflow-hidden shadow-[0_40px_80px_-24px_rgba(15,31,29,0.28)]">
-                <Image
-                  src="https://images.unsplash.com/photo-1551076805-e1869033e561?w=900&auto=format&fit=crop&q=80"
-                  alt="Sahara Hospital staff at work"
-                  fill
-                  className="object-cover"
-                  priority
-                />
+                {heroPhoto ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={heroSrc}
+                    alt={heroPhoto.caption || "Sahara Hospital"}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={heroSrc}
+                    alt="Sahara Hospital"
+                    fill
+                    className="object-cover"
+                    priority
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-forest-900/50 via-transparent" />
               </div>
 
-              {/* Live bed card — floating bottom-left */}
               <div className="absolute bottom-0 left-0 w-[300px] card-soft p-6 animate-float" style={{ animationDelay: "0.3s" }}>
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-clay-500 animate-pulse-soft" />
@@ -141,7 +153,6 @@ export default async function HomePage() {
                   <span className="font-display text-xl text-ink-500">/ {totalBeds}</span>
                 </div>
                 <div className="text-sm text-ink-500 mt-1">beds free right now</div>
-
                 <div className="mt-4 pt-4 border-t border-ink-800/10 flex items-center justify-between">
                   <div>
                     <div className="text-[10px] uppercase tracking-wider text-ink-500">ICU</div>
@@ -155,7 +166,6 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              {/* Stats card — top-left */}
               <div className="absolute top-8 left-0 card-soft px-5 py-4 max-w-[210px]">
                 <div className="text-[10px] uppercase tracking-[0.2em] text-forest-700 font-medium">
                   Since 2009
@@ -172,23 +182,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ===== RUNNING MARQUEE ===== */}
+      {/* ===== MARQUEE ===== */}
       <section className="border-y border-ink-800/10 bg-forest-700 text-cream-100 overflow-hidden py-5">
         <div className="flex animate-marquee gap-16 whitespace-nowrap font-display text-2xl md:text-3xl">
           {[...Array(2)].map((_, g) => (
             <div key={g} className="flex gap-16 shrink-0">
-              {[
-                "Cardiology",
-                "Orthopaedics",
-                "Gynaecology",
-                "Paediatrics",
-                "General Surgery",
-                "Dermatology",
-                "ENT",
-                "General Medicine",
-                "Pathology",
-                "Radiology",
-              ].map((s) => (
+              {["Cardiology", "Orthopaedics", "Gynaecology", "Paediatrics", "General Surgery", "Dermatology", "ENT", "General Medicine", "Pathology", "Radiology"].map((s) => (
                 <span key={s + g} className="flex items-center gap-16">
                   {s}
                   <span className="text-clay-400">✦</span>
@@ -199,7 +198,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ===== BIG STATS ===== */}
+      {/* ===== STATS ===== */}
       <section className="container-x py-24">
         <div className="grid md:grid-cols-4 gap-8">
           {[
@@ -239,7 +238,7 @@ export default async function HomePage() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-[1px] bg-ink-800/10 rounded-3xl overflow-hidden border border-ink-800/10">
-          {Object.keys(serviceIcons).map((name, i) => {
+          {Object.keys(serviceIcons).map((name) => {
             const Icon = serviceIcons[name];
             return (
               <Link
@@ -250,9 +249,8 @@ export default async function HomePage() {
                 <Icon size={32} strokeWidth={1.3} className="text-forest-700 group-hover:text-clay-400 transition-colors" />
                 <div className="mt-10 font-display text-2xl">{name}</div>
                 <div className="mt-2 text-sm text-ink-500 group-hover:text-cream-100/70">
-                  {(doctors.filter((d) => d.department === name).length || 1)} specialist
-                  {doctors.filter((d) => d.department === name).length !== 1 ? "s" : ""} ·
-                  OPD daily
+                  {doctors.filter((d) => d.department === name).length || 1} specialist
+                  {doctors.filter((d) => d.department === name).length !== 1 ? "s" : ""} · OPD daily
                 </div>
                 <div className="mt-6 flex items-center gap-1 text-xs uppercase tracking-widest opacity-0 group-hover:opacity-100 transition">
                   Meet doctors <ArrowRight size={12} />
@@ -262,6 +260,58 @@ export default async function HomePage() {
           })}
         </div>
       </section>
+
+      {/* ═══════════ BEHIND OUR WALLS — hospital photo strip ═══════════ */}
+      {stripPhotos.length > 0 && (
+        <section className="py-24 bg-cream-50">
+          <div className="container-x">
+            <div className="flex flex-wrap items-end justify-between mb-12 gap-6">
+              <div>
+                <div className="eyebrow">Behind our walls</div>
+                <h2 className="mt-4 font-display text-5xl md:text-6xl leading-[1] text-ink-900">
+                  The place,<br />
+                  <span className="serif-italic text-clay-500">honestly.</span>
+                </h2>
+              </div>
+              <Link href="/about" className="btn-outline">
+                More about us <ArrowUpRight size={14} />
+              </Link>
+            </div>
+
+            {/* Horizontal scroll strip — works on mobile + desktop */}
+            <div className="relative -mx-6 md:-mx-10">
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide px-6 md:px-10 snap-x snap-mandatory">
+                {stripPhotos.map((photo) => (
+                  <div
+                    key={photo.id}
+                    className="relative w-[75%] md:w-[380px] aspect-[4/3] flex-shrink-0 rounded-3xl overflow-hidden bg-ink-800/5 snap-start group"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={resolveUrl(photo.photo_url)}
+                      alt={photo.caption || "Sahara Hospital"}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    {photo.caption && (
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-forest-900/85 to-transparent px-5 py-4">
+                        <div className="text-cream-100 text-sm font-display leading-tight">
+                          {photo.caption}
+                        </div>
+                        {photo.category && (
+                          <div className="text-[10px] uppercase tracking-widest text-clay-400 mt-1">
+                            {photo.category.replace("-", " ")}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ===== FEATURED DOCTORS ===== */}
       <section className="container-x py-24">
@@ -279,7 +329,7 @@ export default async function HomePage() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredDoctors.map((doc, i) => (
+          {featuredDoctors.map((doc) => (
             <Link
               href={`/doctors/${doc.id}`}
               key={doc.id}
@@ -341,18 +391,12 @@ export default async function HomePage() {
                 >
                   <div>
                     <div className="flex items-center gap-3">
-                      <span
-                        className={`inline-block w-2 h-2 rounded-full ${
-                          busy ? "bg-clay-500" : "bg-forest-500"
-                        }`}
-                      />
+                      <span className={`inline-block w-2 h-2 rounded-full ${busy ? "bg-clay-500" : "bg-forest-500"}`} />
                       <span className="eyebrow !text-ink-500">{w.type}</span>
                     </div>
                     <div className="font-display text-[26px] mt-1 text-ink-900">{w.name}</div>
                     <div className="text-sm text-ink-500 mt-1">
-                      {w.daily_charge === 0
-                        ? "No room charge"
-                        : `₹${w.daily_charge.toLocaleString()} / day`}
+                      {w.daily_charge === 0 ? "No room charge" : `₹${w.daily_charge.toLocaleString()} / day`}
                     </div>
                   </div>
                   <div className="text-right">
@@ -396,10 +440,7 @@ export default async function HomePage() {
       {/* ===== FINAL CTA ===== */}
       <section className="container-x py-24">
         <div className="grid md:grid-cols-2 gap-6">
-          <Link
-            href="/book"
-            className="group relative overflow-hidden rounded-[32px] bg-clay-500 text-cream-100 p-12 hover:bg-clay-600 transition"
-          >
+          <Link href="/book" className="group relative overflow-hidden rounded-[32px] bg-clay-500 text-cream-100 p-12 hover:bg-clay-600 transition">
             <div className="eyebrow !text-cream-100/70">Start here</div>
             <h3 className="mt-4 font-display text-5xl leading-[1]">
               Book an appointment<br />
@@ -407,17 +448,11 @@ export default async function HomePage() {
             </h3>
             <div className="mt-8 inline-flex items-center gap-2 text-sm uppercase tracking-widest">
               Reserve your slot{" "}
-              <ArrowUpRight
-                size={16}
-                className="transition-transform group-hover:rotate-45"
-              />
+              <ArrowUpRight size={16} className="transition-transform group-hover:rotate-45" />
             </div>
           </Link>
 
-          <Link
-            href="tel:08429933131"
-            className="group relative overflow-hidden rounded-[32px] bg-ink-900 text-cream-100 p-12 hover:bg-forest-900 transition"
-          >
+          <Link href="tel:08429933131" className="group relative overflow-hidden rounded-[32px] bg-ink-900 text-cream-100 p-12 hover:bg-forest-900 transition">
             <div className="eyebrow !text-cream-100/70">24 × 7 Emergency</div>
             <h3 className="mt-4 font-display text-5xl leading-[1]">
               084299<br />
@@ -425,10 +460,7 @@ export default async function HomePage() {
             </h3>
             <div className="mt-8 inline-flex items-center gap-2 text-sm uppercase tracking-widest">
               Call ambulance{" "}
-              <ArrowUpRight
-                size={16}
-                className="transition-transform group-hover:rotate-45"
-              />
+              <ArrowUpRight size={16} className="transition-transform group-hover:rotate-45" />
             </div>
           </Link>
         </div>

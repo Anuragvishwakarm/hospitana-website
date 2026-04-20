@@ -1,8 +1,33 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Heart, Users, Award, Handshake } from "lucide-react";
+import { getHospitalPhotos } from "@/lib/api";
 
-export default function AboutPage() {
+// Revalidate every 5 minutes so newly uploaded photos show up without redeploy
+export const revalidate = 300;
+
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1\/?$/, "") ||
+  "http://localhost:8000";
+
+function resolveUrl(url: string): string {
+  if (url.startsWith("http")) return url;
+  return `${API_BASE}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
+// Fallback used only when admin hasn't uploaded any photos yet
+const FALLBACK_HERO =
+  "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=1600&auto=format&fit=crop&q=80";
+
+export default async function AboutPage() {
+  const photos = await getHospitalPhotos();
+
+  // Pick first photo for the big banner, rest for the mosaic below
+  const heroPhoto = photos[0];
+  const mosaicPhotos = photos.slice(1, 7); // up to 6 mosaic tiles
+
+  const heroSrc = heroPhoto ? resolveUrl(heroPhoto.photo_url) : FALLBACK_HERO;
+
   return (
     <>
       {/* HEADER */}
@@ -20,18 +45,21 @@ export default function AboutPage() {
         </p>
       </section>
 
-      {/* IMAGE BLOCK */}
+      {/* HERO IMAGE — uses first uploaded photo, falls back to stock */}
       <section className="container-x mb-24">
         <div className="relative aspect-[21/9] rounded-[40px] overflow-hidden">
           <Image
-            src="https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?w=1600&auto=format&fit=crop&q=80"
-            alt="Sahara Hospital"
+            src={heroSrc}
+            alt={heroPhoto?.caption || "Sahara Hospital"}
             fill
             className="object-cover"
+            priority
+            unoptimized={!!heroPhoto} // skip Next optimizer for backend-hosted photos
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-forest-900/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-forest-900/50 to-transparent" />
           <div className="absolute bottom-10 left-10 right-10 text-cream-100 font-display text-3xl md:text-5xl max-w-2xl leading-[1.05]">
-            “Bhadohi deserves care that doesn't need a <span className="serif-italic">five-hour bus ride.</span>”
+            "Bhadohi deserves care that doesn't need a{" "}
+            <span className="serif-italic">five-hour bus ride.</span>"
             <div className="mt-4 text-sm uppercase tracking-widest opacity-80">
               — Dr. V.N. Mishra, founder
             </div>
@@ -81,6 +109,70 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* ═══════════ PHOTO MOSAIC — only shows if admin has uploaded ═══════════ */}
+      {mosaicPhotos.length > 0 && (
+        <section className="container-x py-16">
+          <div className="flex flex-wrap items-end justify-between mb-12 gap-6">
+            <div>
+              <div className="eyebrow">Behind our walls</div>
+              <h2 className="mt-4 font-display text-5xl text-ink-900 leading-[1]">
+                See the place<br />
+                <span className="serif-italic text-clay-500">
+                  before you come.
+                </span>
+              </h2>
+            </div>
+            <p className="text-ink-500 max-w-sm leading-relaxed">
+              Honest photos of the hospital, not stock images. Taken on weekdays,
+              during regular OPD hours.
+            </p>
+          </div>
+
+          {/* Editorial mosaic — first image large, rest smaller */}
+          <div className="grid grid-cols-6 gap-3 auto-rows-[180px]">
+            {mosaicPhotos.map((photo, i) => {
+              // Varying sizes for editorial feel
+              const spans = [
+                "col-span-4 row-span-2", // big hero tile
+                "col-span-2 row-span-1",
+                "col-span-2 row-span-1",
+                "col-span-3 row-span-1",
+                "col-span-3 row-span-1",
+                "col-span-6 row-span-1", // wide bottom
+              ];
+              const spanClass = spans[i] || "col-span-2 row-span-1";
+
+              return (
+                <div
+                  key={photo.id}
+                  className={`relative rounded-2xl overflow-hidden bg-forest-50 group ${spanClass}`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={resolveUrl(photo.photo_url)}
+                    alt={photo.caption || `Sahara Hospital photo ${photo.id}`}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  {photo.caption && (
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-forest-900/80 to-transparent px-5 py-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <p className="text-cream-100 text-sm font-display leading-tight">
+                        {photo.caption}
+                      </p>
+                      {photo.category && (
+                        <div className="text-[10px] uppercase tracking-widest text-clay-400 mt-1">
+                          {photo.category.replace("-", " ")}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* TIMELINE */}
       <section className="container-x py-16">
