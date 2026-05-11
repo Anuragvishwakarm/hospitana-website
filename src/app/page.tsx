@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import DoctorAvatar from "@/components/Avatar";
+import HeroSlideshow from "@/components/HeroSlideshow";
 import {
   ArrowUpRight,
   Heart,
@@ -57,128 +57,144 @@ export default async function HomePage() {
   const availableBeds = wards.reduce((s, w) => s + w.available_beds, 0);
   const icu = wards.find((w) => w.type === "icu");
 
-  // Pick hero photo (first uploaded) with Unsplash fallback
-  const heroPhoto = photos[0];
-  const heroSrc = heroPhoto
-    ? resolveUrl(heroPhoto.photo_url)
-    : "https://images.unsplash.com/photo-1551076805-e1869033e561?w=900&auto=format&fit=crop&q=80";
+  const heroPhotos = photos.slice(0, 6);
+  const heroFallback =
+    "https://images.unsplash.com/photo-1551076805-e1869033e561?w=1920&auto=format&fit=crop&q=80";
 
-  // Photos for the "Behind our walls" strip (skip the hero photo)
-  const stripPhotos = photos.slice(heroPhoto ? 1 : 0, heroPhoto ? 9 : 8);
+  const stripPhotos = photos.slice(heroPhotos.length, heroPhotos.length + 8);
 
   return (
     <>
-      {/* ===== HERO ===== */}
-      <section className="relative overflow-hidden pt-10 pb-32">
-        <div className="absolute top-24 right-0 w-[340px] h-[340px] dot-pattern opacity-60 pointer-events-none" />
-        <svg
-          className="absolute -bottom-32 -left-24 w-[520px] opacity-[0.08] text-forest-700 pointer-events-none"
-          viewBox="0 0 200 200"
-          fill="currentColor"
-        >
-          <path d="M42.9,-57.1C54.4,-47.4,61.6,-32.5,66.1,-16.5C70.5,-0.6,72.2,16.4,65.7,29.8C59.2,43.2,44.6,53,29.2,58.5C13.9,64,-2.2,65.2,-18.3,62.1C-34.4,59,-50.5,51.5,-60.4,39C-70.3,26.4,-74,8.8,-70.7,-7.1C-67.5,-23.1,-57.3,-37.4,-44.4,-47.5C-31.5,-57.6,-15.8,-63.5,0.3,-63.9C16.4,-64.3,31.5,-66.8,42.9,-57.1Z" transform="translate(100 100)" />
-        </svg>
+      {/* ═══════════ FULL-BLEED HERO (100vh) ═══════════ */}
+      <section className="relative w-full h-screen min-h-[640px] -mt-[108px] overflow-hidden">
+        {/* Background slideshow fills entire section */}
+        <div className="absolute inset-0">
+          <HeroSlideshow
+            photos={heroPhotos}
+            fallbackSrc={heroFallback}
+            interval={6000}
+            fullBleed
+          />
+        </div>
 
-        <div className="container-x relative">
-          <div className="grid lg:grid-cols-[1.15fr_1fr] gap-16 items-start">
-            <div className="pt-12">
-              <div className="eyebrow animate-fade-up">
-                <span className="inline-block w-8 h-px bg-forest-700 align-middle mr-3" />
-                Bhadohi, Uttar Pradesh · Est. 2009
+        {/* Dark gradient overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-forest-900/50 via-forest-900/40 to-forest-900/70 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-forest-900/60 via-transparent pointer-events-none" />
+
+        {/* Content — positioned over the image */}
+        <div className="relative h-full flex items-center">
+          <div className="container-x w-full pt-[108px] pb-24">
+            <div className="max-w-4xl text-cream-100">
+              <div className="flex items-center gap-3 animate-fade-up">
+                <span className="inline-block w-8 h-px bg-clay-400" />
+                <span className="text-xs uppercase tracking-[0.25em] font-medium text-clay-300">
+                  Bhadohi, Uttar Pradesh · Est. 2009
+                </span>
               </div>
 
-              <h1 className="mt-8 text-[54px] md:text-[84px] lg:text-[92px] font-display font-[400] leading-[0.96] tracking-[-0.03em] text-ink-900 animate-fade-up">
-                Healing,<br />
-                <span className="serif-italic font-[500]">rooted</span> in
-                <span className="text-clay-500"> Bhadohi</span>.
+              <h1
+                className="mt-8 text-[56px] md:text-[96px] lg:text-[120px] font-display font-[400] leading-[0.95] tracking-[-0.03em] animate-fade-up"
+                style={{
+                  textShadow: "0 2px 20px rgba(15, 31, 29, 0.3)",
+                }}
+              >
+                Healing,
+                <br />
+                <span className="serif-italic font-[500]">rooted</span> in{" "}
+                <span className="text-clay-400">Bhadohi</span>.
               </h1>
 
-              <p className="mt-8 max-w-lg text-lg text-ink-500 leading-relaxed animate-fade-up" style={{ animationDelay: "0.15s" }}>
-                82 beds, 24 specialist doctors, and a culture that still runs on chai and
-                patience. Check live bed availability, meet our doctors, and book an OPD
-                slot in under a minute.
+              <p
+                className="mt-10 max-w-xl text-lg md:text-xl leading-relaxed text-cream-100/90 animate-fade-up"
+                style={{
+                  animationDelay: "0.15s",
+                  textShadow: "0 1px 10px rgba(15, 31, 29, 0.4)",
+                }}
+              >
+                82 beds, 24 specialist doctors, and a culture that still runs on
+                chai and patience. Check live bed availability, meet our
+                doctors, and book an OPD slot in under a minute.
               </p>
 
-              <div className="mt-10 flex flex-wrap gap-4 animate-fade-up" style={{ animationDelay: "0.3s" }}>
-                <Link href="/book" className="btn-clay">
+              <div
+                className="mt-12 flex flex-wrap gap-4 animate-fade-up"
+                style={{ animationDelay: "0.3s" }}
+              >
+                <Link href="/book" className="btn-clay shadow-xl">
                   Book Appointment <ArrowUpRight size={16} />
                 </Link>
-                <Link href="/rooms" className="btn-outline">
+                <Link
+                  href="/rooms"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-cream-100/40 text-cream-100 hover:bg-cream-100 hover:text-forest-900 transition backdrop-blur-sm text-sm font-medium"
+                >
                   Check Bed Availability
                 </Link>
               </div>
 
-              <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 animate-fade-up" style={{ animationDelay: "0.45s" }}>
-                <div className="flex items-center gap-2 text-sm text-ink-500">
-                  <Clock size={14} className="text-forest-700" /> 24×7 Emergency
+              <div
+                className="mt-16 flex flex-wrap items-center gap-x-8 gap-y-4 animate-fade-up"
+                style={{ animationDelay: "0.45s" }}
+              >
+                <div className="flex items-center gap-2 text-sm text-cream-100/90">
+                  <Clock size={14} className="text-clay-400" /> 24×7 Emergency
                 </div>
-                <div className="flex items-center gap-2 text-sm text-ink-500">
-                  <ShieldCheck size={14} className="text-forest-700" /> Ayushman Bharat
+                <div className="flex items-center gap-2 text-sm text-cream-100/90">
+                  <ShieldCheck size={14} className="text-clay-400" /> Ayushman
+                  Bharat
                 </div>
-                <div className="flex items-center gap-2 text-sm text-ink-500">
-                  <span className="inline-block w-2 h-2 rounded-full bg-clay-500" />
+                <div className="flex items-center gap-2 text-sm text-cream-100/90">
+                  <span className="inline-block w-2 h-2 rounded-full bg-clay-400 animate-pulse-soft" />
                   NABH accredited
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div className="relative h-[560px] animate-fade-up" style={{ animationDelay: "0.2s" }}>
-              <div className="absolute top-0 right-0 w-[85%] h-[78%] rounded-[32px] overflow-hidden shadow-[0_40px_80px_-24px_rgba(15,31,29,0.28)]">
-                {heroPhoto ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={heroSrc}
-                    alt={heroPhoto.caption || "Sahara Hospital"}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <Image
-                    src={heroSrc}
-                    alt="Sahara Hospital"
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-forest-900/50 via-transparent" />
-              </div>
-
-              <div className="absolute bottom-0 left-0 w-[300px] card-soft p-6 animate-float" style={{ animationDelay: "0.3s" }}>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-clay-500 animate-pulse-soft" />
-                  <span className="eyebrow">Live Availability</span>
+        {/* Floating "Live availability" card — bottom-right */}
+        <div
+          className="absolute bottom-8 right-6 md:right-12 z-20 max-w-[290px] animate-float"
+          style={{ animationDelay: "0.6s" }}
+        >
+          <div className="bg-cream-100/95 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-cream-100/50">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-clay-500 animate-pulse-soft" />
+              <span className="eyebrow">Live Availability</span>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="font-display text-5xl text-forest-900">
+                {availableBeds}
+              </span>
+              <span className="font-display text-xl text-ink-500">
+                / {totalBeds}
+              </span>
+            </div>
+            <div className="text-sm text-ink-500 mt-1">
+              beds free right now
+            </div>
+            <div className="mt-4 pt-4 border-t border-ink-800/10 flex items-center justify-between">
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-ink-500">
+                  ICU
                 </div>
-                <div className="mt-3 flex items-baseline gap-2">
-                  <span className="font-display text-5xl text-forest-900">{availableBeds}</span>
-                  <span className="font-display text-xl text-ink-500">/ {totalBeds}</span>
-                </div>
-                <div className="text-sm text-ink-500 mt-1">beds free right now</div>
-                <div className="mt-4 pt-4 border-t border-ink-800/10 flex items-center justify-between">
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wider text-ink-500">ICU</div>
-                    <div className="font-display text-lg text-forest-900">
-                      {icu?.available_beds ?? 0} / {icu?.total_beds ?? 0}
-                    </div>
-                  </div>
-                  <Link href="/rooms" className="text-xs text-clay-500 link-underline uppercase tracking-wider">
-                    View wards →
-                  </Link>
+                <div className="font-display text-lg text-forest-900">
+                  {icu?.available_beds ?? 0} / {icu?.total_beds ?? 0}
                 </div>
               </div>
-
-              <div className="absolute top-8 left-0 card-soft px-5 py-4 max-w-[210px]">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-forest-700 font-medium">
-                  Since 2009
-                </div>
-                <div className="font-display text-3xl text-ink-900 mt-1">
-                  {(stats.patients_served_yearly / 1000).toFixed(0)}K+
-                </div>
-                <div className="text-xs text-ink-500 leading-snug">
-                  patients looked after, every year
-                </div>
-              </div>
+              <Link
+                href="/rooms"
+                className="text-xs text-clay-500 link-underline uppercase tracking-wider"
+              >
+                View wards →
+              </Link>
             </div>
           </div>
+        </div>
+
+        {/* Scroll-down hint at bottom-center */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 hidden md:flex flex-col items-center gap-2 text-cream-100/60 animate-pulse-soft">
+          <span className="text-[10px] uppercase tracking-[0.3em]">Scroll</span>
+          <div className="w-px h-8 bg-cream-100/40" />
         </div>
       </section>
 
@@ -187,7 +203,18 @@ export default async function HomePage() {
         <div className="flex animate-marquee gap-16 whitespace-nowrap font-display text-2xl md:text-3xl">
           {[...Array(2)].map((_, g) => (
             <div key={g} className="flex gap-16 shrink-0">
-              {["Cardiology", "Orthopaedics", "Gynaecology", "Paediatrics", "General Surgery", "Dermatology", "ENT", "General Medicine", "Pathology", "Radiology"].map((s) => (
+              {[
+                "Cardiology",
+                "Orthopaedics",
+                "Gynaecology",
+                "Paediatrics",
+                "General Surgery",
+                "Dermatology",
+                "ENT",
+                "General Medicine",
+                "Pathology",
+                "Radiology",
+              ].map((s) => (
                 <span key={s + g} className="flex items-center gap-16">
                   {s}
                   <span className="text-clay-400">✦</span>
@@ -278,7 +305,6 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            {/* Horizontal scroll strip — works on mobile + desktop */}
             <div className="relative -mx-6 md:-mx-10">
               <div className="flex gap-4 overflow-x-auto scrollbar-hide px-6 md:px-10 snap-x snap-mandatory">
                 {stripPhotos.map((photo) => (

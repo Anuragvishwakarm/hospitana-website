@@ -1,49 +1,61 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
-import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import AIChatbot from "@/components/AIChatbot";
+import "./globals.css";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
   variable: "--font-fraunces",
   display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const manrope = Manrope({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
   variable: "--font-manrope",
   display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Sahara Hospital, Bhadohi — Healing, Rooted Here.",
+  title: "Sahara Hospital — Bhadohi, UP",
   description:
-    "A full-service multispeciality hospital in Bhadohi, Uttar Pradesh. Check live bed availability, book an appointment with our doctors, and explore our wards — cash, cashless, and Ayushman Bharat accepted.",
+    "Compassionate hospital care in Bhadohi. Doctors across cardiology, " +
+    "paediatrics, general medicine and more. Book appointments online.",
   keywords: [
     "Sahara Hospital",
     "Bhadohi hospital",
-    "hospital UP",
-    "book doctor appointment",
-    "bed availability",
-    "Hospitana",
+    "UP hospital",
+    "doctor appointment",
+    "ICU Bhadohi",
   ],
 };
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${manrope.variable}`}>
-      <body className="bg-cream-100">
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${manrope.variable}`}
+    >
+      <body className="bg-[#fdf8ef] text-[#0f2a34] antialiased min-h-screen flex flex-col">
         <Navbar />
-        <main className="relative z-[2]">{children}</main>
+        <main className="flex-1">{children}</main>
         <Footer />
+
+        {/*
+          AI assistant — floating chatbot on every page.
+          - Reads access_token from localStorage to auto-auth logged-in patients.
+          - Persists session_id in localStorage so multi-turn memory survives
+            page navigation.
+          - Hidden behind a small teal pill at bottom-right until opened.
+        */}
+        <AIChatbot />
       </body>
     </html>
   );

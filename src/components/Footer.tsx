@@ -71,11 +71,11 @@ export default function Footer() {
       </div>
 
       {/* Oversized display wordmark */}
-      <div className="container-x overflow-hidden">
+      {/* <div className="container-x overflow-hidden">
         <div className="font-display text-[18vw] md:text-[15vw] leading-[0.85] text-cream-100/5 select-none tracking-tighter -mb-4">
           Sahara<span className="serif-italic">.</span>
         </div>
-      </div>
+      </div> */}
 
       <div className="container-x py-6 flex flex-col md:flex-row justify-between gap-3 text-xs text-cream-100/50 border-t border-cream-100/10">
         <span>© {new Date().getFullYear()} Sahara Hospital Pvt. Ltd. · Reg. No. UP-BDH-2009-417</span>
