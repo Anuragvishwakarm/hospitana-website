@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #ffffff;
+    --ink: #1f2937;
+    --primary: #0066cc;
+    --secondary: #00a86b;
+    --emergency: #dc2626;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  ::selection {
+    background: #0066cc;
+    color: #ffffff;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: "Inter", system-ui, sans-serif;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+}
+
+@layer components {
+  .container-x {
+    @apply w-full max-w-none px-4 sm:px-6 lg:px-10 xl:px-14 2xl:px-16;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-blue-600 hover:bg-blue-50 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  }
+
+  .btn-clay {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+  }
+
+  .card-soft {
+    @apply rounded-xl border border-gray-100 bg-white shadow-lg transition-shadow hover:shadow-xl;
+  }
+
+  .eyebrow {
+    @apply font-body text-sm font-semibold uppercase tracking-[0.12em] text-primary;
+  }
+
+  .serif-italic {
+    @apply font-display font-bold;
+  }
+
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .link-underline:hover {
+    background-size: 100% 1px;
+  }
+}
+
+/* Decorative dotted pattern used in hero backgrounds */
+.dot-pattern {
+  background-image: radial-gradient(circle, rgba(0, 102, 204, 0.14) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Hide scrollbars on horizontal pill rails — keep scroll behavior */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;             /* Chrome/Safari/Opera */
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #e5e7eb;
+}
+::-webkit-scrollbar-thumb {
+  background: #0066cc;
+  border-radius: 99px;
+  border: 2px solid #e5e7eb;
+}
